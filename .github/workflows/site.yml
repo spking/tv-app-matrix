@@ -32,7 +32,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir _site
-          cp -r index.html app.js style.css admin.html admin.js admin.css validate.js data logos _site/
+          cp -r *.html *.js *.css data logos _site/
 
       - uses: actions/upload-pages-artifact@v5
         with: { path: _site }

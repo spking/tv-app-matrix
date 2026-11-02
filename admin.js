@@ -1,6 +1,7 @@
 // Editor for data/matrix.json. Saves by committing to the GitHub repo with the editor's
 // own token; the deploy workflow re-validates and publishes. See README.md.
 import { validate, rowLabel } from "./validate.js";
+import { renderGuide } from "./render-guide.js";
 
 // The page adds the brackets around the TV brands itself, so drop any typed in.
 const cleanDetail = (d) => (d || "").trim().replace(/^\((.*)\)$/, "$1").trim();
@@ -72,6 +73,7 @@ const withIds = (d) => {
   for (const a of d.apps) a._id ??= nextId++;
   for (const r of d.rows) r._id ??= nextId++;
   d.sources ??= { updated: "", items: [] };
+  d.guide ??= { title: "Leiðavísir", text: "" };
   for (const s of d.sources.items) s._id ??= nextId++;
   return d;
 };
@@ -83,6 +85,7 @@ function serialize(d) {
     title: d.title, subtitle: d.subtitle || "", cornerLabel: d.cornerLabel || "",
     apps: d.apps.map((a) => (a.logo ? { name: a.name.trim(), logo: a.logo } : { name: a.name.trim() })),
     rows: d.rows.map((r) => ({ name: r.name.trim(), detail: cleanDetail(r.detail), values: [...r.values] })),
+    guide: { title: (d.guide?.title || "").trim() || "Leiðavísir", text: (d.guide?.text || "").replace(/\s+$/, "") },
     sources: {
       updated: d.sources.updated || "",
       items: d.sources.items.map((s) => ({ label: (s.label || "").trim(), url: (s.url || "").trim(), note: (s.note || "").trim(), dead: !!s.dead })),
@@ -130,6 +133,9 @@ function describeChanges(a, b) {
   const common = (x, y) => x.map((i) => i._id).filter((id) => y.some((j) => j._id === id)).join(",");
   if (common(a.apps, b.apps) !== common(b.apps, a.apps)) out.push("Röð appa breytt");
   if (common(a.rows, b.rows) !== common(b.rows, a.rows)) out.push("Röð stýrikerfa breytt");
+  const ga = JSON.parse(serialize(a)).guide, gb = JSON.parse(serialize(b)).guide;
+  if (ga.title !== gb.title) out.push(`Fyrirsögn leiðavísis: „${ga.title}“ → „${gb.title}“`);
+  if (ga.text !== gb.text) out.push(!ga.text ? "Leiðavísir: texta bætt við" : !gb.text ? "Leiðavísir: texti fjarlægður" : "Leiðavísi breytt");
   const srcA = JSON.stringify(serializeSources(a)), srcB = JSON.stringify(serializeSources(b));
   if (srcA !== srcB) {
     const n = b.sources.items.length - a.sources.items.length;
@@ -143,6 +149,7 @@ const serializeSources = (d) => JSON.parse(serialize(d)).sources.items;
 function render() {
   renderGrid();
   renderGeneral();
+  renderGuideEditor();
   renderSources();
   updateDirty();
 }
@@ -262,6 +269,19 @@ function renderGeneral() {
     input.value = state[k] || "";
     input.oninput = () => { state[k] = input.value; if (k === "cornerLabel") document.querySelector("#grid .corner").textContent = input.value; updateDirty(); };
   }
+}
+
+function renderGuideEditor() {
+  const title = $("guide-title-input"), text = $("guide-text");
+  const preview = () => {
+    $("guide-preview-title").textContent = title.value.trim() || "Leiðavísir";
+    $("guide-empty").hidden = renderGuide($("guide-preview"), text.value);
+  };
+  title.value = state.guide.title || "";
+  text.value = state.guide.text || "";
+  title.oninput = () => { state.guide.title = title.value; preview(); updateDirty(); };
+  text.oninput = () => { state.guide.text = text.value; preview(); updateDirty(); };
+  preview();
 }
 
 function renderSources() {

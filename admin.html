@@ -63,6 +63,26 @@
     </section>
 
     <section class="panel">
+      <h2>Leiðavísir</h2>
+      <p class="muted hint">Birtist á milli matrixunnar og heimildanna. Kassinn er falinn á síðunni á meðan textinn er tómur.</p>
+      <div class="guide-edit">
+        <div>
+          <label class="field"><span>Fyrirsögn</span><input id="guide-title-input" placeholder="Leiðavísir"></label>
+          <label class="field"><span>Texti</span><textarea id="guide-text" rows="9" placeholder="Skrifaðu leiðbeiningar hér…"></textarea></label>
+          <p class="muted hint">Auð lína = ný málsgrein · lína sem byrjar á „- “ = punktur í lista · vefslóðir verða að tenglum</p>
+        </div>
+        <div>
+          <span class="field"><span>Forskoðun</span></span>
+          <section class="guide preview" aria-live="polite">
+            <h2><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75"/><path d="M8 7.2v4.3M8 4.6v.1"/></svg><span id="guide-preview-title">Leiðavísir</span></h2>
+            <div id="guide-preview" class="guide-body"></div>
+            <p id="guide-empty" class="muted">(tómt, svo kassinn sést ekki á síðunni)</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
       <h2>Almennt</h2>
       <div class="fields">
         <label class="field"><span>Titill</span><input data-field="title"></label>

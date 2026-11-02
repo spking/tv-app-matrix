@@ -7,6 +7,7 @@
 //   title, subtitle, cornerLabel: string
 //   apps:    [{ name, logo? }]                      logo = "logos/<file>"
 //   rows:    [{ name, detail, values: ["Já"|"Nei", …one per app] }]   detail = TV brands, shown in the ⓘ
+//   guide:   { title, text }                         "Leiðavísir" box; hidden while text is empty
 //   sources: { updated, items: [{ label, url, note, dead }] }
 // }
 
@@ -61,6 +62,14 @@ export function validate(d) {
       if (!Array.isArray(r.values) || r.values.length !== n) err(where, `þarf ${n} gildi, eitt fyrir hvert app`);
       else r.values.forEach((v, j) => { if (!VALUES.includes(v)) err(where, `gildi fyrir ${d.apps[j]?.name ?? j + 1} verður að vera Já eða Nei`); });
     });
+  }
+
+  if (d.guide != null) {
+    if (typeof d.guide !== "object" || Array.isArray(d.guide)) err("Leiðavísir", "ógilt");
+    else {
+      str(d.guide.title ?? "", "Leiðavísir fyrirsögn", { max: 60 });
+      str(d.guide.text ?? "", "Leiðavísir texti", { max: 5000 });
+    }
   }
 
   if (d.sources != null) {

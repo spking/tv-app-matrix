@@ -7,7 +7,7 @@
   <meta name="description" content="Samhæfni streymisveitna og sjónvarpsstýrikerfa">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='17' rx='3' fill='none' stroke='%232f6fde' stroke-width='3'/%3E%3Cpath d='M10 28h12' stroke='%232f6fde' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
-  <script src="app.js" defer></script>
+  <script type="module" src="app.js"></script>
 </head>
 <body>
   <header class="top">
@@ -29,6 +29,11 @@
     </div>
     <div id="cards" class="cards" hidden></div>
     <p id="empty" class="muted empty" hidden>Ekkert stýrikerfi passar við leitina.</p>
+
+    <section id="guide" class="guide" hidden aria-labelledby="guide-title">
+      <h2 id="guide-title"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75"/><path d="M8 7.2v4.3M8 4.6v.1"/></svg><span id="guide-heading">Leiðavísir</span></h2>
+      <div id="guide-body" class="guide-body"></div>
+    </section>
 
     <section id="sources" class="sources" hidden>
       <details>

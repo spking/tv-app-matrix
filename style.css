@@ -207,6 +207,19 @@ tbody tr:hover td:not(.hi) { background: color-mix(in srgb, var(--hi) 45%, trans
 
 .empty { padding: 24px 0; }
 
+/* ---------- Leiðavísir ---------- */
+.guide {
+  margin-top: 24px;
+  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: 12px; padding: 14px 18px;
+}
+.guide h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; margin: 0 0 6px; }
+.guide h2 svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; }
+.guide-body { font-size: 14px; overflow-wrap: anywhere; }
+.guide-body p, .guide-body ul { margin: 6px 0; }
+.guide-body ul { padding-left: 22px; }
+.guide-body li { margin: 2px 0; }
+
 /* ---------- Sources ---------- */
 .sources { margin-top: 28px; }
 .sources summary { cursor: pointer; font-weight: 600; padding: 4px 0; }

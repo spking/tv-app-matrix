@@ -1,3 +1,5 @@
+import { renderGuide } from "./render-guide.js";
+
 (() => {
   "use strict";
 
@@ -273,6 +275,11 @@
     $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 80); });
     render();
     renderSources(data.sources);
+    // Leiðavísir: shown only once it has content.
+    if (data.guide && renderGuide($("guide-body"), data.guide.text)) {
+      $("guide-heading").textContent = data.guide.title || "Leiðavísir";
+      $("guide").hidden = false;
+    }
 
     // Print the sources expanded.
     const det = document.querySelector("#sources details");
