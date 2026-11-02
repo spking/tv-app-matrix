@@ -59,6 +59,8 @@ The subtitle starts with **útgáfa X.Y**, which updates itself on every deploy:
 - The number is the repo's commit count minus `base` in `version.json`. The same content always has the same number, and nothing is written back to the repo.
 - It is added only to the deployed copy of the data, so the editor's *Undirtitill* field holds just the text after it.
 
+Version 4.0 is the first version published on GitHub Pages (commit `99384b5`); 3.2 was the last Google Sheets version.
+
 **To start a new main version** (for example 4.0): note the current version shown on the site, say 3.17. In `version.json`, set `"major": 4` and add the current minor plus 1 to `base` (so if `base` is 9, it becomes 9 + 17 + 1 = 27). That edit is itself a commit and deploys as 4.0. If you'd rather not do the sum, ask Claude.
 
 ## Files
