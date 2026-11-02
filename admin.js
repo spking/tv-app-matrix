@@ -226,8 +226,9 @@ function renderGrid() {
       const btn = h("button", { type: "button", class: "toggle" });
       const paint = () => {
         const yes = row.values[j] === "Já";
-        btn.className = "toggle mark " + (yes ? "m-yes" : "m-no");
-        btn.textContent = yes ? "✓ Já" : "✕ Nei";
+        btn.className = "toggle tick " + (yes ? "yes" : "no");
+        btn.replaceChildren(tickIcon(yes));
+        btn.title = yes ? "Já – smelltu til að breyta í Nei" : "Nei – smelltu til að breyta í Já";
         btn.setAttribute("aria-label", `${apps[j].name} á ${rowLabel(row)}: ${row.values[j]}`);
       };
       btn.addEventListener("click", () => { row.values[j] = row.values[j] === "Já" ? "Nei" : "Já"; paint(); updateDirty(); });
@@ -237,6 +238,17 @@ function renderGrid() {
     body.append(tr);
   });
   t.append(body);
+}
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+function tickIcon(yes) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("d", yes ? "M3.5 8.5l3 3 6-7" : "M4.5 4.5l7 7M11.5 4.5l-7 7");
+  svg.append(path);
+  return svg;
 }
 
 function moveValues(a, b) { for (const r of state.rows) [r.values[a], r.values[b]] = [r.values[b], r.values[a]]; }

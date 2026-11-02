@@ -78,13 +78,26 @@
     if (color) box.style.background = color;
   }
 
+  // Já → white check on green, Nei → white cross on red. The word stays in the page as
+  // hidden text for screen readers, search-in-page and copy/paste.
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function tick(yes) {
+    const t = el("span", "tick " + (yes ? "yes" : "no"));
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", yes ? "M3.5 8.5l3 3 6-7" : "M4.5 4.5l7 7M11.5 4.5l-7 7");
+    svg.append(path);
+    t.append(svg, el("span", "sr-only", yes ? "Já" : "Nei"));
+    t.title = yes ? "Já – virkar" : "Nei – virkar ekki";
+    return t;
+  }
+
   function mark(value) {
     const k = kind(value);
-    const m = el("span", "mark m-" + k);
-    if (k === "yes") { m.append(el("span", "icon", "✓"), " ", value); m.title = "Virkar"; }
-    else if (k === "no") { m.append(el("span", "icon", "✕"), " ", value); m.title = "Virkar ekki"; }
-    else m.textContent = value || "–";
-    return m;
+    if (k === "yes" || k === "no") return tick(k === "yes");
+    return el("span", "mark m-" + k, value || "–");
   }
 
   function osLabel(row, tag) {

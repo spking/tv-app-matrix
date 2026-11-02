@@ -11,6 +11,7 @@
   --hi: #e3ecff;
   --yes-bg: #d4edda; --yes-fg: #17602c;
   --no-bg: #fde0e0;  --no-fg: #a12323;
+  --yes-solid: #1e9a4c; --no-solid: #d63a3a;
   --other-bg: #eceff4; --other-fg: #444c5c;
   color-scheme: light;
 }
@@ -27,6 +28,7 @@
     --accent: #7aa7ff;
     --yes-bg: #153824; --yes-fg: #8fe0aa;
     --no-bg: #431d22;  --no-fg: #ffa3a3;
+    --yes-solid: #23894a; --no-solid: #c53636;
     --other-bg: #262d42; --other-fg: #c4cad8;
     color-scheme: dark;
   }
@@ -73,6 +75,24 @@ h1 { font-size: 26px; line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
 .m-no    { background: var(--no-bg);    color: var(--no-fg); }
 .m-other { background: var(--other-bg); color: var(--other-fg); }
 .m-empty { color: var(--muted); }
+
+/* Já / Nei icons */
+.tick {
+  display: inline-grid; place-items: center; vertical-align: middle;
+  width: 28px; height: 28px; border-radius: 8px; color: #fff;
+}
+.tick.yes { background: var(--yes-solid); }
+.tick.no  { background: var(--no-solid); }
+.tick svg {
+  width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.answer .tick { width: 22px; height: 22px; border-radius: 6px; margin-left: 2px; }
+.answer .tick svg { width: 13px; height: 13px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 
 /* ---------- Logos ---------- */
 .logo {

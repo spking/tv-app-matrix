@@ -71,8 +71,8 @@ thead button.icon { background: transparent; color: #fff; border-color: rgba(255
 .row-edit .mini { justify-content: flex-start; margin-top: 0; }
 .os-name-input { font-weight: 700; }
 #grid td { text-align: center; }
-button.toggle { border: 0; min-width: 72px; justify-content: center; padding: 5px 10px; }
-button.toggle:hover { filter: brightness(.95); box-shadow: 0 0 0 2px var(--accent); }
+button.toggle { border: 0; padding: 0; width: 32px; height: 32px; border-radius: 8px; }
+button.toggle:hover { filter: brightness(1.08); box-shadow: 0 0 0 2px var(--accent); }
 
 /* Sources */
 .sources-edit { padding-left: 24px; margin: 0; }
