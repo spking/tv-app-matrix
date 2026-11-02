@@ -44,13 +44,38 @@
     const box = el("span", "logo" + (size ? " " + size : ""));
     if (app.logo) {
       const img = el("img");
-      img.src = app.logo; img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+      img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+      img.addEventListener("load", () => matchBackground(box, img), { once: true });
+      img.src = app.logo;
       box.appendChild(img);
     } else {
       box.classList.add("placeholder");
       box.textContent = app.name.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 2);
     }
     return box;
+  }
+
+  // A non-square logo is letterboxed inside the square slot. Fill the slot with the
+  // image's corner colour so a wide logo on a dark background (e.g. Nova TV) doesn't
+  // get white bars. Transparent corners keep the default white backing.
+  const bgCache = new Map();
+  function matchBackground(box, img) {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h || Math.abs(w / h - 1) < 0.05) return;
+    let color = bgCache.get(img.src);
+    if (color === undefined) {
+      color = null;
+      try {
+        const c = document.createElement("canvas");
+        c.width = c.height = 1;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);   // top-left pixel
+        const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+        if (a > 200) color = `rgb(${r}, ${g}, ${b})`;
+      } catch (_) { /* unreadable image: keep white */ }
+      bgCache.set(img.src, color);
+    }
+    if (color) box.style.background = color;
   }
 
   function mark(value) {

@@ -22,7 +22,8 @@
     },
     {
       "name": "Nova TV",
-      "slug": "nova-tv"
+      "slug": "nova-tv",
+      "logo": "data/img/nova-tv.png"
     },
     {
       "name": "Vísir",
@@ -31,7 +32,8 @@
     },
     {
       "name": "Viaplay",
-      "slug": "viaplay"
+      "slug": "viaplay",
+      "logo": "data/img/viaplay.jpg"
     },
     {
       "name": "HBO Max",
@@ -40,7 +42,8 @@
     },
     {
       "name": "Prime",
-      "slug": "prime"
+      "slug": "prime",
+      "logo": "data/img/prime.png"
     }
   ],
   "rows": [

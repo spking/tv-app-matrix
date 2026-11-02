@@ -40,7 +40,6 @@ jobs:
           else echo "mode=none" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/setup-node@v7
-        if: steps.src.outputs.mode != 'none'
         with: { node-version: 22, cache: npm }
 
       - name: Convert export to data/matrix.json
@@ -60,14 +59,19 @@ jobs:
             exit 1
           fi
           mkdir -p "$RUNNER_TEMP/export" && unzip -q "$RUNNER_TEMP/export.zip" -d "$RUNNER_TEMP/export"
-          node scripts/build-data.mjs "$RUNNER_TEMP/export"
+          node scripts/build-data.mjs "$RUNNER_TEMP/export"   # also applies logos
 
-      - name: Commit refreshed data
-        if: steps.src.outputs.mode != 'none'
+      # On a plain push (no sheet refresh), still apply logos/ so a new or replaced
+      # logo file takes effect straight away.
+      - name: Apply logos
+        if: steps.src.outputs.mode == 'none'
+        run: node scripts/apply-logos.mjs
+
+      - name: Commit data changes
         run: |
           git rm -q --ignore-unmatch import/*.zip
           git add data
-          if git diff --cached --quiet; then echo "Sheet unchanged."; exit 0; fi
+          if git diff --cached --quiet; then echo "No data changes."; exit 0; fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git commit -m "Update matrix data"
@@ -77,6 +81,7 @@ jobs:
         run: |
           mkdir _site
           cp -r index.html app.js style.css data _site/
+          rm -rf _site/data/img/sheet   # originals; the chosen logos are in data/img/
 
       - uses: actions/upload-pages-artifact@v5
         with: { path: _site }

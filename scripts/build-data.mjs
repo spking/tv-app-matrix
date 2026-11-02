@@ -11,13 +11,13 @@
 //   OS rows        every row after that until the first blank row
 //   "Síðast uppfært:" / "Uppfært:"   label cell, date in the next cell
 //
-// Logos: a file in logos/<slug>.(png|jpg|svg|webp) wins over the image in the sheet,
-// so you can drop in sharper versions. Slugs are printed when the script runs.
+// Logos: see scripts/apply-logos.mjs (a file in logos/ wins over the sheet's image).
 
 import { readFile, writeFile, mkdir, copyFile, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, extname, basename } from "node:path";
 import { parse } from "node-html-parser";
+import { applyLogos } from "./apply-logos.mjs";
 
 const MATRIX_TAB = process.env.MATRIX_TAB || "S.A.M";
 const SOURCES_TAB = process.env.SOURCES_TAB || "Heimildir";
@@ -182,21 +182,16 @@ function buildSources(grid) {
 }
 
 // ---------- Logos ----------
-async function resolveLogos(apps) {
-  await rm(OUT_IMG, { recursive: true, force: true });
-  await mkdir(OUT_IMG, { recursive: true });
-  const overrides = existsSync("logos") ? await readdir("logos") : [];
+// Saves the sheet's logo-row images as data/img/sheet/<slug>.<ext>; apply-logos then
+// picks between those and any override in logos/.
+async function saveSheetLogos(apps) {
+  const out = join(OUT_IMG, "sheet");
+  await rm(out, { recursive: true, force: true });
+  await mkdir(out, { recursive: true });
   for (const app of apps) {
-    const own = overrides.find((f) => basename(f, extname(f)) === app.slug && /\.(png|jpe?g|svg|webp)$/i.test(f));
-    let src = null, how = "none — name only";
-    if (own) { src = join("logos", own); how = "logos/" + own; }
-    else if (app.sheetImg && existsSync(join(dir, app.sheetImg))) { src = join(dir, app.sheetImg); how = "from sheet"; }
-    if (src) {
-      const out = join(OUT_IMG, app.slug + extname(src).toLowerCase());
-      await copyFile(src, out);
-      app.logo = out;
+    if (app.sheetImg && existsSync(join(dir, app.sheetImg))) {
+      await copyFile(join(dir, app.sheetImg), join(out, app.slug + extname(app.sheetImg).toLowerCase()));
     }
-    console.log(`  ${app.name.padEnd(18)} slug=${app.slug.padEnd(16)} logo: ${how}`);
     delete app.sheetImg;
   }
 }
@@ -219,7 +214,8 @@ const widths = new Set(data.rows.map((r) => r.values.length));
 if (widths.size !== 1) fail("rows have differing numbers of values");
 
 console.log(`${data.title}: ${data.rows.length} OS rows × ${data.apps.length} apps, updated ${data.updated ?? "?"}`);
-await resolveLogos(data.apps);
+await saveSheetLogos(data.apps);
 await mkdir("data", { recursive: true });
 await writeFile(OUT_JSON, JSON.stringify(data, null, 2) + "\n");
 console.log(`wrote ${OUT_JSON}` + (data.sources ? ` (+ ${data.sources.items.length} sources)` : ""));
+await applyLogos({ json: OUT_JSON, imgDir: OUT_IMG });

@@ -32,20 +32,22 @@ To check the sheet automatically, uncomment `schedule:` in `.github/workflows/si
 
 ## Logos
 
-The sheet's logo row is used automatically. To use a sharper image, drop a file into `logos/` named after the app's slug:
+The sheet's logo row is used automatically. To use your own image instead, upload it to `logos/` on GitHub (*Add file → Upload files*). The next run picks it up, with no sheet refresh needed.
 
-| App | File |
+The file name must match the app's name. Case and dashes don't matter, so `nova-tv.png`, `novatv.png` and `NovaTV.png` all match **Nova TV**:
+
+| App | File name |
 |---|---|
-| Sjónvarp Símans | `logos/sjonvarp-simans.png` |
-| Sýn | `logos/syn.png` |
-| RÚV Appið | `logos/ruv-appid.png` |
-| Nova TV | `logos/nova-tv.png` |
-| Vísir | `logos/visir.png` |
-| Viaplay | `logos/viaplay.png` |
-| HBO Max | `logos/hbo-max.jpg` |
-| Prime | `logos/prime.png` |
+| Sjónvarp Símans | `sjonvarp-simans` |
+| Sýn | `syn` |
+| RÚV Appið | `ruv-appid` |
+| Nova TV | `nova-tv` |
+| Vísir | `visir` |
+| Viaplay | `viaplay` |
+| HBO Max | `hbo-max` |
+| Prime | `prime` |
 
-Any of `.png .jpg .svg .webp` works. The converter prints each app's slug, so new apps show what name to use. Apps without a logo get a two-letter placeholder.
+Any of `.png .jpg .svg .webp` works; square images look best. A file that matches no app shows as a yellow **warning** on the workflow run, with the names it would accept. Delete a file from `logos/` to go back to the sheet's image. Apps with neither get a two-letter placeholder.
 
 ## Using the page
 
