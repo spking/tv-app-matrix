@@ -1,13 +1,10 @@
 {
-  "name": "app-matrix",
+  "name": "tv-app-matrix",
   "private": true,
   "type": "module",
-  "description": "Converts the Google Sheets HTML export into data/matrix.json for the static site.",
+  "description": "Static TV app compatibility matrix. No dependencies; see README.md.",
   "scripts": {
-    "build-data": "node scripts/build-data.mjs test/fixture",
+    "check": "node scripts/check.mjs",
     "serve": "python3 -m http.server 8000"
-  },
-  "dependencies": {
-    "node-html-parser": "9.0.6"
   }
 }

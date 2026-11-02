@@ -1,66 +1,72 @@
 # Sjónvarps · App Matrix
 
-A static site, hosted on GitHub Pages, that shows which streaming apps work on which TV operating systems. The Google Sheet stays the single source of truth. This repo turns it into a fast, searchable page that works on phones and prints well.
+A static site, hosted on GitHub Pages, that shows which streaming apps work on which TV operating systems.
+
+- **Public page:** `https://spking.github.io/tv-app-matrix/`
+- **Editor:** `https://spking.github.io/tv-app-matrix/admin.html` (not linked from the public page)
 
 ## How it works
 
 ```
-Google Sheet ──(Web page .html, zipped)──▶ scripts/build-data.mjs ──▶ data/matrix.json + data/img/ ──▶ index.html
+admin.html ──(your GitHub token)──▶ commit to main ──▶ check data ──▶ deploy to Pages
 ```
 
-- The live page reads only `data/matrix.json`. It never calls Google, so it is fast and doesn't depend on how the sheet is shared.
-- The converter finds the title, header row, logo row, OS rows, "Síðast uppfært" date and author **by structure, not fixed row numbers**. Adding an OS row or an app column in the sheet needs no code change.
-- The HTML export (rather than CSV) keeps link labels, strikethrough (dead sources) and the logo row.
-- If Google ever changes its export format, the conversion fails loudly and the last good data stays live.
+- The data lives in the repo: `data/matrix.json`, plus logo images in `logos/`. There is no Google Sheet anymore.
+- The editor saves by committing to this repo with **your own GitHub token**. Anyone can open the editor page, but only someone with a token that has write access to this repo can save.
+- **Invalid data never reaches the site.** The editor checks before saving, and every deploy re-checks with the same rules (`validate.js`). If the check fails, nothing is deployed and the site keeps its last good version. This also covers edits made directly on GitHub.
+- Every save is a commit with a plain-language message, such as "Vísir á WebOS (LG): Nei → Já". The full history is on GitHub, and any change can be undone there.
 
 ## One-time setup
 
-1. Push this repo to GitHub on branch `main`.
-2. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-3. Make sure the sheet is shared as **Anyone with the link can view** (needed only for option A below).
+### Pages
 
-The site appears at `https://<user>.github.io/<repo>/`.
+**Settings → Pages → Build and deployment → Source: GitHub Actions.**
+This is required for the data check: with "Deploy from a branch", GitHub publishes the files without running the check.
 
-## Updating the matrix
+### Your editor token
 
-Edit the Google Sheet as usual, then either:
+1. On GitHub, go to **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token** ([direct link](https://github.com/settings/personal-access-tokens/new)).
+2. **Repository access:** *Only select repositories* → `spking/tv-app-matrix`.
+3. **Permissions → Repository permissions:**
+   - **Contents: Read and write** (required, to save)
+   - **Actions: Read-only** (optional; lets the editor tell you when the change is live)
+4. Pick an expiry date, generate the token, and paste it into the editor. Tick *Muna á þessu tæki* to stay connected on that device.
 
-- **A. One click:** go to **Actions → Update & deploy → Run workflow**. It pulls the sheet, commits the changed data and deploys.
-- **B. Manual upload:** in Sheets, go to *File → Download → Web page (.html, zipped)*. On GitHub, open the `import/` folder (or create it) and use *Add file → Upload files* to upload the zip. The workflow converts it, removes the zip and deploys.
+The token is stored only in that browser. Use **Aftengjast** in the editor to remove it. If a token is lost or leaked, delete it on GitHub, where it stops working immediately, and make a new one.
 
-To check the sheet automatically, uncomment `schedule:` in `.github/workflows/site.yml`.
+To let someone else edit, add them as a collaborator on the repo (**Settings → Collaborators**). They then create their own token the same way.
 
-## Logos
+## Editing
 
-The sheet's logo row is used automatically. To use your own image instead, upload it to `logos/` on GitHub (*Add file → Upload files*). The next run picks it up, with no sheet refresh needed.
+Open `admin.html` and connect. You can then:
 
-The file name must match the app's name. Case and dashes don't matter, so `nova-tv.png`, `novatv.png` and `NovaTV.png` all match **Nova TV**:
+- **Toggle Já/Nei** by clicking a cell.
+- **Add an operating system** with **+ Stýrikerfi**. Put the brand in *Nánar*, for example `(Hisense)`, and it shows in grey after the name.
+- **Add an app** with **+ App**, then click its logo tile to upload a logo. PNG, JPG, WebP and SVG all work; square logos look best. Images are scaled down automatically.
+- **Reorder** with ▲ ▼ ◀ ▶, **delete** with ✕, and **remove a logo** with ⌫.
+- **Edit general text and sources** below the matrix. Tick *Úrelt* (outdated) to show a source as dead.
 
-| App | File name |
+**Vista og birta** (save and publish) lists your changes for confirmation, then saves them as a single commit. The editor follows the deploy and tells you when the change is live, which usually takes about a minute. The "Síðast uppfært" date is set to today automatically; untick the box to keep the old date.
+
+If someone else saved while you were editing, your save is refused instead of overwriting theirs. Reload and make your change again.
+
+## Files
+
+| Path | Purpose |
 |---|---|
-| Sjónvarp Símans | `sjonvarp-simans` |
-| Sýn | `syn` |
-| RÚV Appið | `ruv-appid` |
-| Nova TV | `nova-tv` |
-| Vísir | `visir` |
-| Viaplay | `viaplay` |
-| HBO Max | `hbo-max` |
-| Prime | `prime` |
-
-Any of `.png .jpg .svg .webp` works; square images look best. A file that matches no app shows as a yellow **warning** on the workflow run, with the names it would accept. Delete a file from `logos/` to go back to the sheet's image. Apps with neither get a two-letter placeholder.
-
-## Using the page
-
-- **Search** understands TV brands, OS names and app names, ignoring accents. `samsung hbo` shows the Tizen row, highlights HBO Max and answers "HBO Max á Tizen (Samsung): ✓ Já". `philips` shows both TitanOS rows. The search is kept in the URL (`?q=…`), so a link can be shared.
-- **On phones**, each OS becomes a card, with the searched app at the top.
-- **Print** gives A4 landscape: the table on one page, with the sources listed after it.
+| `index.html`, `app.js`, `style.css` | The public page |
+| `admin.html`, `admin.js`, `admin.css` | The editor |
+| `validate.js` | Data rules, shared by the editor and the deploy check |
+| `data/matrix.json` | The matrix, general text and sources |
+| `logos/` | App logos, referenced from `data/matrix.json` |
+| `scripts/check.mjs` | Deploy check (`npm run check`) |
+| `.github/workflows/site.yml` | Check and deploy on every push to `main` |
 
 ## Working locally (optional)
 
 ```bash
-npm ci
-npm run build-data      # converts test/fixture/ (a copy of the sheet's export)
-npm run serve           # http://localhost:8000
+npm run check    # validate data/matrix.json
+npm run serve    # http://localhost:8000 (the editor works locally too, and saves to GitHub)
 ```
 
-To try a fresh download: `node scripts/build-data.mjs <unzipped folder>`. If the tabs are renamed, set `MATRIX_TAB` / `SOURCES_TAB` (defaults: `S.A.M`, `Heimildir`).
+No dependencies to install.

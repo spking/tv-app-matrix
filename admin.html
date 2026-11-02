@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="is">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Breyta matrix</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='17' rx='3' fill='none' stroke='%232f6fde' stroke-width='3'/%3E%3Cpath d='M10 28h12' stroke='%232f6fde' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script type="module" src="admin.js"></script>
+</head>
+<body class="admin">
+  <header class="top">
+    <div class="heading">
+      <h1>Breyta matrix</h1>
+      <p class="muted"><a href="./">← Skoða síðuna</a></p>
+    </div>
+  </header>
+
+  <!-- Step 1: connect -->
+  <section id="connect" class="panel" hidden>
+    <h2>Tengjast</h2>
+    <p>Breytingar eru vistaðar beint í GitHub-geymsluna og birtast á síðunni eftir um mínútu.
+       Til að vista þarf aðgangslykil (fine-grained personal access token) sem hefur skrifaðgang að
+       <code id="repo-name"></code>. Leiðbeiningar eru í README-skránni.</p>
+    <form id="connect-form" autocomplete="off">
+      <label class="field">
+        <span>Aðgangslykill</span>
+        <input id="token" type="password" placeholder="github_pat_…" required spellcheck="false">
+      </label>
+      <label class="check"><input id="remember" type="checkbox" checked> Muna á þessu tæki</label>
+      <div class="actions">
+        <button type="submit" class="primary">Tengjast</button>
+        <a class="muted" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Búa til lykil á GitHub ↗</a>
+      </div>
+      <p id="connect-error" class="error" hidden></p>
+    </form>
+  </section>
+
+  <p id="loading" class="muted">Hleð…</p>
+
+  <!-- Step 2: edit -->
+  <div id="editor" hidden>
+    <div class="toolbar">
+      <span id="dirty" class="muted">Engar breytingar</span>
+      <span class="spacer"></span>
+      <button id="discard" type="button" disabled>Henda breytingum</button>
+      <button id="save" type="button" class="primary" disabled>Vista og birta</button>
+      <button id="disconnect" type="button" class="link">Aftengjast</button>
+    </div>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <section class="panel">
+      <h2>Matrix</h2>
+      <p class="muted hint">Smelltu á Já/Nei til að breyta. Smelltu á merki apps til að hlaða upp nýju.</p>
+      <div class="grid-wrap"><table id="grid"></table></div>
+      <div class="actions">
+        <button id="add-row" type="button">+ Stýrikerfi</button>
+        <button id="add-app" type="button">+ App</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Almennt</h2>
+      <div class="fields">
+        <label class="field"><span>Titill</span><input data-field="title"></label>
+        <label class="field"><span>Undirtitill</span><input data-field="subtitle"></label>
+        <label class="field"><span>Dálkaheiti</span><input data-field="cornerLabel"></label>
+        <label class="field"><span>Höfundur</span><input data-field="author"></label>
+      </div>
+      <p class="muted">Síðast uppfært: <strong id="updated"></strong>
+        <label class="check inline"><input id="bump-date" type="checkbox" checked> setja dagsetningu dagsins við vistun</label></p>
+    </section>
+
+    <section class="panel">
+      <h2>Heimildir</h2>
+      <ol id="sources" class="sources-edit"></ol>
+      <div class="actions"><button id="add-source" type="button">+ Heimild</button></div>
+    </section>
+  </div>
+
+  <dialog id="confirm-save">
+    <form method="dialog">
+      <h2>Vista og birta?</h2>
+      <ul id="change-list"></ul>
+      <div class="actions end">
+        <button value="cancel">Hætta við</button>
+        <button value="ok" class="primary">Vista og birta</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

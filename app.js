@@ -182,15 +182,14 @@
     for (const item of src.items) {
       const li = el("li", item.dead ? "dead" : "");
       if (item.dead) li.title = "Hlekkur ekki lengur virkur";
-      for (const run of item.runs) {
-        let n;
-        if (run.href && /^https?:\/\//i.test(run.href)) {
-          n = el("a", "", run.t);
-          n.href = run.href; n.target = "_blank"; n.rel = "noopener noreferrer";
-        } else n = document.createTextNode(run.t);
-        if (run.strike && !item.dead) { const s = el("s"); s.append(n); n = s; }
-        li.append(n);
-      }
+      const text = item.label || item.url;
+      // A dead source keeps its URL visible as text but isn't clickable.
+      if (item.url && !item.dead && /^https?:\/\//i.test(item.url)) {
+        const a = el("a", "", text);
+        a.href = item.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+        li.append(a);
+      } else li.append(text);
+      if (item.note) li.append(" " + item.note);
       ol.append(li);
     }
     $("sources").hidden = false;
@@ -205,7 +204,7 @@
       $("status").textContent = "Ekki tókst að hlaða gögnum (" + e.message + ").";
       return;
     }
-    for (const r of data.rows) r._key = fold(r.label);
+    for (const r of data.rows) { r.label = r.detail ? `${r.name} ${r.detail}` : r.name; r._key = fold(r.label); }
     for (const a of data.apps) a._key = fold(a.name);
 
     document.title = data.title;

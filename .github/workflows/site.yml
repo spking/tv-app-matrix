@@ -1,20 +1,15 @@
 name: Update & deploy
 
-# Ways in:
-#  • Push to main (code/logo edits)              → deploy as-is
-#  • Actions → "Update & deploy" → Run workflow  → pull the sheet, then deploy
-#      (the sheet must be shared as "Anyone with the link can view")
-#  • Upload a "Web page (.html, zipped)" download into import/ on GitHub
-#      (Add file → Upload files)                  → convert that zip, then deploy
+# Runs on every push to main, including saves from the editor (admin.html).
+# The data is checked first; if it is invalid nothing is deployed and the site keeps
+# its last good version. "Run workflow" on the Actions tab redeploys by hand.
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  # schedule:                # uncomment to also pull the sheet automatically (UTC)
-  #   - cron: "17 6 * * 1"   # Mondays 06:17
 
 permissions:
-  contents: write   # commit refreshed data
+  contents: read
   pages: write
   id-token: write
 
@@ -22,66 +17,22 @@ concurrency:
   group: site
   cancel-in-progress: false
 
-env:
-  SHEET_ID: 1zhWzwLFq3yAZnI-qDM5xI-zwDQpTqeLgD5K1OpCnd0k
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Decide whether to refresh data
-        id: src
-        run: |
-          zip=$(ls -t import/*.zip 2>/dev/null | head -1 || true)
-          if [ -n "$zip" ]; then echo "mode=upload" >> "$GITHUB_OUTPUT"; echo "zip=$zip" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" != "push" ]; then echo "mode=sheet" >> "$GITHUB_OUTPUT"
-          else echo "mode=none" >> "$GITHUB_OUTPUT"; fi
-
       - uses: actions/setup-node@v7
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 22 }
 
-      - name: Convert export to data/matrix.json
-        if: steps.src.outputs.mode != 'none'
-        run: |
-          set -euo pipefail
-          npm ci
-          if [ "${{ steps.src.outputs.mode }}" = "upload" ]; then
-            cp "${{ steps.src.outputs.zip }}" "$RUNNER_TEMP/export.zip"
-          else
-            curl -fsSL --retry 3 -o "$RUNNER_TEMP/export.zip" \
-              "https://docs.google.com/spreadsheets/d/$SHEET_ID/export?format=zip"
-          fi
-          # A sheet that isn't link-shared returns a sign-in page, not a zip.
-          if ! unzip -tq "$RUNNER_TEMP/export.zip" >/dev/null 2>&1; then
-            echo "::error::Download is not a zip. Is the sheet shared as 'Anyone with the link can view'?"
-            exit 1
-          fi
-          mkdir -p "$RUNNER_TEMP/export" && unzip -q "$RUNNER_TEMP/export.zip" -d "$RUNNER_TEMP/export"
-          node scripts/build-data.mjs "$RUNNER_TEMP/export"   # also applies logos
-
-      # On a plain push (no sheet refresh), still apply logos/ so a new or replaced
-      # logo file takes effect straight away.
-      - name: Apply logos
-        if: steps.src.outputs.mode == 'none'
-        run: node scripts/apply-logos.mjs
-
-      - name: Commit data changes
-        run: |
-          git rm -q --ignore-unmatch import/*.zip
-          git add data
-          if git diff --cached --quiet; then echo "No data changes."; exit 0; fi
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Update matrix data"
-          git push
+      - name: Check data
+        run: node scripts/check.mjs
 
       - name: Assemble site
         run: |
           mkdir _site
-          cp -r index.html app.js style.css data _site/
-          rm -rf _site/data/img/sheet   # originals; the chosen logos are in data/img/
+          cp -r index.html app.js style.css admin.html admin.js admin.css validate.js data logos _site/
 
       - uses: actions/upload-pages-artifact@v5
         with: { path: _site }
