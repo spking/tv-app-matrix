@@ -17,7 +17,8 @@
     },
     {
       "name": "RÚV Appið",
-      "slug": "ruv-appid"
+      "slug": "ruv-appid",
+      "logo": "data/img/ruv-appid.png"
     },
     {
       "name": "Nova TV",
