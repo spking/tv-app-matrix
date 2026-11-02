@@ -1,0 +1,13 @@
+{
+  "name": "app-matrix",
+  "private": true,
+  "type": "module",
+  "description": "Converts the Google Sheets HTML export into data/matrix.json for the static site.",
+  "scripts": {
+    "build-data": "node scripts/build-data.mjs test/fixture",
+    "serve": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "node-html-parser": "9.0.6"
+  }
+}

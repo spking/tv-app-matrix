@@ -1,251 +1,207 @@
 (() => {
   "use strict";
 
-  const cfg = Object.assign(
-    { title: "Matrix", subtitle: "", sheets: [], headerRows: 1, stickyColumns: 1, status: {} },
-    window.MATRIX_CONFIG || {}
-  );
-
   const $ = (id) => document.getElementById(id);
-  const els = {
-    title: $("title"), subtitle: $("subtitle"), search: $("search"), count: $("count"),
-    tabs: $("tabs"), status: $("status"), wrap: $("wrap"), table: $("matrix"), updated: $("updated"),
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
   };
 
-  // value (lowercased) -> status class
-  const statusLookup = new Map();
-  for (const [cls, values] of Object.entries(cfg.status)) {
-    for (const v of values) statusLookup.set(String(v).trim().toLowerCase(), cls);
-  }
+  // Accent-insensitive matching: "ruv" finds "RÚV", "visir" finds "Vísir".
+  const fold = (s) => s.toLowerCase()
+    .replace(/þ/g, "th").replace(/ð/g, "d").replace(/æ/g, "ae")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-  const cache = new Map();          // file -> { rows, modified }
-  let current = null;               // { header: [][], body: [][] }
-  let sort = { col: -1, dir: 1 };
+  const YES = new Set(["ja", "yes", "y", "✓"]);
+  const NO = new Set(["nei", "no", "n", "✗"]);
+  const kind = (v) => (YES.has(fold(v.trim())) ? "yes" : NO.has(fold(v.trim())) ? "no" : v.trim() ? "other" : "empty");
 
-  // ---------- CSV (RFC 4180: quoted fields, escaped quotes, embedded newlines) ----------
-  function parseCSV(text) {
-    if (text.charCodeAt(0) === 0xfeff) text = text.slice(1); // strip BOM
-    const rows = [];
-    let row = [], field = "", i = 0, inQuotes = false;
-    while (i < text.length) {
-      const c = text[i];
-      if (inQuotes) {
-        if (c === '"') {
-          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
-          inQuotes = false; i++; continue;
-        }
-        field += c; i++; continue;
+  let data;
+
+  // ---------- Search ----------
+  // Each word filters OS rows if it matches one; otherwise, if it matches an app, it
+  // highlights that app's column. So "samsung hbo" → Tizen row, HBO Max column.
+  function interpret(query) {
+    const words = fold(query).split(/\s+/).filter(Boolean);
+    const rowWords = [], apps = new Set();
+    let unmatched = false;
+    for (const w of words) {
+      if (data.rows.some((r) => r._key.includes(w))) rowWords.push(w);
+      else {
+        const hits = data.apps.map((a, i) => (a._key.includes(w) ? i : -1)).filter((i) => i >= 0);
+        if (hits.length) hits.forEach((i) => apps.add(i));
+        else unmatched = true;
       }
-      if (c === '"') { inQuotes = true; i++; continue; }
-      if (c === ",") { row.push(field); field = ""; i++; continue; }
-      if (c === "\r") { i++; continue; }
-      if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
-      field += c; i++;
     }
-    if (field !== "" || row.length) { row.push(field); rows.push(row); }
-    return trimGrid(rows);
+    const rows = unmatched ? [] : data.rows.filter((r) => rowWords.every((w) => r._key.includes(w)));
+    return { rows, apps, active: words.length > 0 };
   }
 
-  // Sheets exports often carry trailing blank rows/columns; drop them and square the grid.
-  function trimGrid(rows) {
-    const isBlank = (r) => r.every((v) => v.trim() === "");
-    while (rows.length && isBlank(rows[rows.length - 1])) rows.pop();
-    let width = 0;
-    for (const r of rows) {
-      let w = r.length;
-      while (w > 0 && r[w - 1].trim() === "") w--;
-      width = Math.max(width, w);
+  // ---------- Render ----------
+  function logo(app, size) {
+    const box = el("span", "logo" + (size ? " " + size : ""));
+    if (app.logo) {
+      const img = el("img");
+      img.src = app.logo; img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+      box.appendChild(img);
+    } else {
+      box.classList.add("placeholder");
+      box.textContent = app.name.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 2);
     }
-    return rows.map((r) => {
-      const out = r.slice(0, width);
-      while (out.length < width) out.push("");
-      return out;
+    return box;
+  }
+
+  function mark(value) {
+    const k = kind(value);
+    const m = el("span", "mark m-" + k);
+    if (k === "yes") { m.append(el("span", "icon", "✓"), " ", value); m.title = "Virkar"; }
+    else if (k === "no") { m.append(el("span", "icon", "✕"), " ", value); m.title = "Virkar ekki"; }
+    else m.textContent = value || "–";
+    return m;
+  }
+
+  function osLabel(row, tag) {
+    const h = el(tag, "os");
+    h.append(el("span", "os-name", row.name));
+    if (row.detail) h.append(" ", el("span", "os-detail", row.detail));
+    return h;
+  }
+
+  function score(row) {
+    const yes = row.values.filter((v) => kind(v) === "yes").length;
+    return el("span", "score", `${yes}/${row.values.length}`);
+  }
+
+  function renderTable(rows, hiApps) {
+    const t = $("matrix");
+    t.replaceChildren();
+    const thead = el("thead"), htr = el("tr");
+    const corner = el("th", "corner", data.cornerLabel);
+    corner.scope = "col";
+    htr.append(corner);
+    data.apps.forEach((a, i) => {
+      const th = el("th", "app" + (hiApps.has(i) ? " hi" : ""));
+      th.scope = "col";
+      th.append(logo(a), el("span", "app-name", a.name));
+      htr.append(th);
     });
+    thead.append(htr);
+
+    const tbody = el("tbody");
+    for (const r of rows) {
+      const tr = el("tr");
+      const th = el("th", "rowhead");
+      th.scope = "row";
+      th.append(osLabel(r, "div"), score(r));
+      tr.append(th);
+      r.values.forEach((v, i) => {
+        const td = el("td", hiApps.has(i) ? "hi" : "");
+        td.append(mark(v));
+        tr.append(td);
+      });
+      tbody.append(tr);
+    }
+    t.append(thead, tbody);
   }
 
-  // ---------- Rendering ----------
-  const URL_RE = /\bhttps?:\/\/[^\s<>"']+/g;
-
-  // Builds cell content with DOM nodes only (never innerHTML) so sheet content can't inject markup.
-  function fillCell(cell, value, query) {
-    const status = statusLookup.get(value.trim().toLowerCase());
-    if (status) {
-      const span = document.createElement("span");
-      span.className = "badge s-" + status;
-      appendHighlighted(span, value.trim(), query);
-      cell.appendChild(span);
-      return;
+  function renderCards(rows, hiApps) {
+    const wrap = $("cards");
+    wrap.replaceChildren();
+    for (const r of rows) {
+      const card = el("article", "card");
+      const head = el("header");
+      head.append(osLabel(r, "h2"), score(r));
+      const list = el("ul");
+      // Highlighted apps first, so the answer is at the top of the card.
+      const order = data.apps.map((_, i) => i).sort((a, b) => hiApps.has(b) - hiApps.has(a));
+      for (const i of order) {
+        const li = el("li", hiApps.has(i) ? "hi" : "");
+        li.append(logo(data.apps[i], "sm"), el("span", "app-name", data.apps[i].name), mark(r.values[i]));
+        list.append(li);
+      }
+      card.append(head, list);
+      wrap.append(card);
     }
-    let last = 0;
-    for (const m of value.matchAll(URL_RE)) {
-      appendHighlighted(cell, value.slice(last, m.index), query);
-      const a = document.createElement("a");
-      a.href = m[0]; a.target = "_blank"; a.rel = "noopener noreferrer";
-      appendHighlighted(a, m[0], query);
-      cell.appendChild(a);
-      last = m.index + m[0].length;
-    }
-    appendHighlighted(cell, value.slice(last), query);
   }
 
-  function appendHighlighted(parent, text, query) {
-    if (!text) return;
-    if (!query) { parent.appendChild(document.createTextNode(text)); return; }
-    const lower = text.toLowerCase();
-    let pos = 0, idx;
-    while ((idx = lower.indexOf(query, pos)) !== -1) {
-      if (idx > pos) parent.appendChild(document.createTextNode(text.slice(pos, idx)));
-      const mark = document.createElement("mark");
-      mark.textContent = text.slice(idx, idx + query.length);
-      parent.appendChild(mark);
-      pos = idx + query.length;
-    }
-    if (pos < text.length) parent.appendChild(document.createTextNode(text.slice(pos)));
+  function renderAnswer(res) {
+    const a = $("answer");
+    a.replaceChildren();
+    if (res.rows.length === 1 && res.apps.size === 1) {
+      const i = [...res.apps][0], r = res.rows[0];
+      a.append(el("strong", "", data.apps[i].name), " á ", el("strong", "", r.label), ": ", mark(r.values[i]));
+      a.hidden = false;
+    } else a.hidden = true;
   }
-
-  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
   function render() {
-    const { header, body } = current;
-    const query = els.search.value.trim().toLowerCase();
-    const nSticky = Math.min(cfg.stickyColumns, (header[0] || body[0] || []).length);
-
-    let rows = query ? body.filter((r) => r.some((v) => v.toLowerCase().includes(query))) : body.slice();
-    if (sort.col >= 0) {
-      rows.sort((a, b) => sort.dir * collator.compare(a[sort.col], b[sort.col]));
-    }
-
-    const table = els.table;
-    table.replaceChildren();
-
-    const thead = document.createElement("thead");
-    header.forEach((hrow, hi) => {
-      const tr = document.createElement("tr");
-      hrow.forEach((v, ci) => {
-        const th = document.createElement("th");
-        th.scope = "col";
-        fillCell(th, v, "");
-        if (hi === header.length - 1) {
-          th.title = "Click to sort";
-          th.addEventListener("click", () => toggleSort(ci));
-          if (sort.col === ci) th.setAttribute("aria-sort", sort.dir > 0 ? "ascending" : "descending");
-        }
-        markSticky(th, ci, nSticky);
-        tr.appendChild(th);
-      });
-      thead.appendChild(tr);
-    });
-    table.appendChild(thead);
-
-    const tbody = document.createElement("tbody");
-    const frag = document.createDocumentFragment();
-    for (const r of rows) {
-      const tr = document.createElement("tr");
-      r.forEach((v, ci) => {
-        const td = document.createElement(ci < nSticky ? "th" : "td");
-        if (ci < nSticky) td.scope = "row";
-        fillCell(td, v, query);
-        markSticky(td, ci, nSticky);
-        tr.appendChild(td);
-      });
-      frag.appendChild(tr);
-    }
-    tbody.appendChild(frag);
-    table.appendChild(tbody);
-
-    els.count.textContent = query ? `${rows.length} of ${body.length} rows` : `${body.length} rows`;
-    requestAnimationFrame(positionSticky);
-  }
-
-  function markSticky(cell, ci, nSticky) {
-    if (ci >= nSticky) return;
-    cell.classList.add("sticky");
-    cell.dataset.col = ci;
-    if (ci === nSticky - 1) cell.classList.add("sticky-last");
-  }
-
-  // Sticky columns need cumulative left offsets, and multi-row headers need top offsets.
-  function positionSticky() {
-    const table = els.table;
-    const firstRow = table.tBodies[0]?.rows[0] || table.tHead?.rows[table.tHead.rows.length - 1];
-    if (!firstRow) return;
-    const lefts = [];
-    let acc = 0;
-    for (const cell of firstRow.cells) {
-      if (!cell.classList.contains("sticky")) break;
-      lefts.push(acc);
-      acc += cell.getBoundingClientRect().width;
-    }
-    table.querySelectorAll(".sticky").forEach((c) => { c.style.left = lefts[+c.dataset.col] + "px"; });
-    const h1 = table.tHead?.rows[0]?.getBoundingClientRect().height;
-    if (h1) table.style.setProperty("--h1", h1 + "px");
-  }
-
-  function toggleSort(col) {
-    if (sort.col !== col) sort = { col, dir: 1 };
-    else if (sort.dir === 1) sort.dir = -1;
-    else sort = { col: -1, dir: 1 };   // third click restores sheet order
-    render();
-  }
-
-  // ---------- Loading ----------
-  async function load(sheet) {
-    if (!cache.has(sheet.file)) {
-      // no-cache: revalidate with the server so a fresh deploy shows up immediately
-      const res = await fetch(sheet.file, { cache: "no-cache" });
-      if (!res.ok) throw new Error(`${sheet.file}: HTTP ${res.status}`);
-      cache.set(sheet.file, { rows: parseCSV(await res.text()), modified: res.headers.get("Last-Modified") });
-    }
-    return cache.get(sheet.file);
-  }
-
-  async function show(index) {
-    const sheet = cfg.sheets[index];
-    if (!sheet) return;
-    [...els.tabs.children].forEach((b, i) => b.setAttribute("aria-selected", String(i === index)));
+    const res = interpret($("q").value);
+    renderTable(res.rows, res.apps);
+    renderCards(res.rows, res.apps);
+    renderAnswer(res);
+    $("empty").hidden = res.rows.length > 0;
+    $("table-wrap").hidden = $("cards").hidden = res.rows.length === 0;
     try {
-      const { rows, modified } = await load(sheet);
-      const h = Math.max(0, Math.min(cfg.headerRows, rows.length));
-      current = { header: rows.slice(0, h), body: rows.slice(h) };
-      sort = { col: -1, dir: 1 };
-      els.status.hidden = true;
-      els.wrap.hidden = false;
-      render();
-      els.updated.textContent = modified
-        ? "Data updated " + new Date(modified).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
-        : "";
-      try { history.replaceState(null, "", "#" + encodeURIComponent(sheet.name)); } catch (_) {}
-    } catch (err) {
-      els.wrap.hidden = true;
-      els.status.hidden = false;
-      els.status.textContent = "Couldn't load the matrix (" + err.message + ").";
-      console.error(err);
-    }
+      const u = new URL(location.href);
+      $("q").value ? u.searchParams.set("q", $("q").value) : u.searchParams.delete("q");
+      history.replaceState(null, "", u);
+    } catch (_) {}
   }
 
-  function init() {
-    document.title = cfg.title;
-    els.title.textContent = cfg.title;
-    if (cfg.subtitle) { els.subtitle.textContent = cfg.subtitle; els.subtitle.hidden = false; }
-
-    if (cfg.sheets.length > 1) {
-      cfg.sheets.forEach((s, i) => {
-        const b = document.createElement("button");
-        b.type = "button"; b.role = "tab"; b.textContent = s.name;
-        b.addEventListener("click", () => show(i));
-        els.tabs.appendChild(b);
-      });
-      els.tabs.hidden = false;
+  function renderSources(src) {
+    if (!src || !src.items.length) return;
+    $("sources-meta").textContent = `(${src.items.length})` + (src.updated ? ` · uppfært ${src.updated}` : "");
+    const ol = $("sources-list");
+    for (const item of src.items) {
+      const li = el("li", item.dead ? "dead" : "");
+      if (item.dead) li.title = "Hlekkur ekki lengur virkur";
+      for (const run of item.runs) {
+        let n;
+        if (run.href && /^https?:\/\//i.test(run.href)) {
+          n = el("a", "", run.t);
+          n.href = run.href; n.target = "_blank"; n.rel = "noopener noreferrer";
+        } else n = document.createTextNode(run.t);
+        if (run.strike && !item.dead) { const s = el("s"); s.append(n); n = s; }
+        li.append(n);
+      }
+      ol.append(li);
     }
+    $("sources").hidden = false;
+  }
 
+  async function init() {
+    try {
+      const res = await fetch("data/matrix.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      data = await res.json();
+    } catch (e) {
+      $("status").textContent = "Ekki tókst að hlaða gögnum (" + e.message + ").";
+      return;
+    }
+    for (const r of data.rows) r._key = fold(r.label);
+    for (const a of data.apps) a._key = fold(a.name);
+
+    document.title = data.title;
+    $("title").textContent = data.title;
+    $("subtitle").textContent = data.subtitle;
+    if (data.updated) $("updated").textContent = "Síðast uppfært " + data.updated;
+    if (data.author) $("author").textContent = data.author;
+    $("status").hidden = true;
+
+    const q = new URLSearchParams(location.search).get("q");
+    if (q) $("q").value = q;
     let t;
-    els.search.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => current && render(), 120); });
-    window.addEventListener("resize", () => current && positionSticky());
+    $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 80); });
+    render();
+    renderSources(data.sources);
 
-    const fromHash = decodeURIComponent(location.hash.slice(1));
-    const start = Math.max(0, cfg.sheets.findIndex((s) => s.name === fromHash));
-    if (!cfg.sheets.length) { els.status.textContent = "No sheets configured in config.js."; return; }
-    show(start);
+    // Print the sources expanded.
+    const det = document.querySelector("#sources details");
+    let was;
+    addEventListener("beforeprint", () => { was = det.open; det.open = true; });
+    addEventListener("afterprint", () => { det.open = was; });
   }
 
   init();

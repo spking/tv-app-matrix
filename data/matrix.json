@@ -1,0 +1,302 @@
+{
+  "title": "Sjónvarps · App Matrix",
+  "subtitle": "útgáfa 3.2 · Samhæfni Streymisveitna og Sjónvarpsstýrikerfa",
+  "cornerLabel": "Stýrikerfi / App",
+  "updated": "02/11/2026",
+  "author": "Sölvi Scheving Pálsson",
+  "apps": [
+    {
+      "name": "Sjónvarp Símans",
+      "slug": "sjonvarp-simans",
+      "logo": "data/img/sjonvarp-simans.png"
+    },
+    {
+      "name": "Sýn",
+      "slug": "syn",
+      "logo": "data/img/syn.png"
+    },
+    {
+      "name": "RÚV Appið",
+      "slug": "ruv-appid"
+    },
+    {
+      "name": "Nova TV",
+      "slug": "nova-tv"
+    },
+    {
+      "name": "Vísir",
+      "slug": "visir",
+      "logo": "data/img/visir.png"
+    },
+    {
+      "name": "Viaplay",
+      "slug": "viaplay"
+    },
+    {
+      "name": "HBO Max",
+      "slug": "hbo-max",
+      "logo": "data/img/hbo-max.jpg"
+    },
+    {
+      "name": "Prime",
+      "slug": "prime"
+    }
+  ],
+  "rows": [
+    {
+      "label": "Tizen (Samsung)",
+      "name": "Tizen",
+      "detail": "(Samsung)",
+      "values": [
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Nei",
+        "Já",
+        "Já",
+        "Já"
+      ]
+    },
+    {
+      "label": "WebOS (LG)",
+      "name": "WebOS",
+      "detail": "(LG)",
+      "values": [
+        "Já",
+        "Nei",
+        "Já",
+        "Já",
+        "Nei",
+        "Já",
+        "Já",
+        "Já"
+      ]
+    },
+    {
+      "label": "Android TV (Gömul TCL, iFFalcon)",
+      "name": "Android TV",
+      "detail": "(Gömul TCL, iFFalcon)",
+      "values": [
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já"
+      ]
+    },
+    {
+      "label": "TitanOS (Philips) 2024+",
+      "name": "TitanOS",
+      "detail": "(Philips) 2024+",
+      "values": [
+        "Já",
+        "Nei",
+        "Nei",
+        "Nei",
+        "Nei",
+        "Já",
+        "Já",
+        "Já"
+      ]
+    },
+    {
+      "label": "TitanOS (Philips) 2023 og eldra",
+      "name": "TitanOS",
+      "detail": "(Philips) 2023 og eldra",
+      "values": [
+        "Nei",
+        "Nei",
+        "Nei",
+        "Nei",
+        "Nei",
+        "Já",
+        "Nei",
+        "Já"
+      ]
+    },
+    {
+      "label": "Apple TV",
+      "name": "Apple TV",
+      "detail": "",
+      "values": [
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já"
+      ]
+    },
+    {
+      "label": "Google TV (Sony, Ný TCL 2025)",
+      "name": "Google TV",
+      "detail": "(Sony, Ný TCL 2025)",
+      "values": [
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já",
+        "Já"
+      ]
+    }
+  ],
+  "sources": {
+    "updated": "03/03/2026",
+    "items": [
+      {
+        "runs": [
+          {
+            "t": "Ingi E. (Des. 2024)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://www.ruv.is/um-ruv/opp-fra-ruv-fyrir-snjalltaeki",
+            "href": "https://www.ruv.is/um-ruv/opp-fra-ruv-fyrir-snjalltaeki"
+          },
+          {
+            "t": " (Mars 2026)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://sjonvarp.siminn.is/",
+            "href": "https://sjonvarp.siminn.is/"
+          },
+          {
+            "t": " (Feb. 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://stod2.is/stod-2-plus/ (Feb. 2025)",
+            "strike": true
+          }
+        ],
+        "dead": true
+      },
+      {
+        "runs": [
+          {
+            "t": "http://syn.is/sjonvarp",
+            "href": "http://syn.is/sjonvarp"
+          },
+          {
+            "t": " (Júní 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "Oddur (Júlí 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://apps.apple.com/us/app/hbo-max-stream-movies-tv/id1666653815",
+            "href": "https://apps.apple.com/us/app/hbo-max-stream-movies-tv/id1666653815"
+          },
+          {
+            "t": " (Mars 2026)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://help.hbomax.com/tr-en/answer/detail/000002506",
+            "href": "https://help.hbomax.com/tr-en/answer/detail/000002506#:~:text=Update:%20On%20your%20LG%20TV,TV%20might%20not%20be%20supported."
+          },
+          {
+            "t": " (Ágúst 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "Nýtt Samsung TV app frá Sýn, vinsælasta sjónvarpsefnið á Íslandi beint í þitt sjónvarp",
+            "href": "https://www.syn.is/frettir/nytt-samsung-tv-app-fra-syn"
+          },
+          {
+            "t": " (Ágúst 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://www.primevideo.com/help?nodeId=GK4GR2DKAKDK92H9",
+            "href": "https://www.primevideo.com/help?nodeId=GK4GR2DKAKDK92H9"
+          },
+          {
+            "t": " (September 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://elko.is/vorur/tcl-55-p69k-sjonvarp-2025-393464/55P69K",
+            "href": "https://elko.is/vorur/tcl-55-p69k-sjonvarp-2025-393464/55P69K"
+          },
+          {
+            "t": " (Nóv 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://tv-sound-monitors.philips.com/s/article/1657009835114",
+            "href": "https://tv-sound-monitors.philips.com/s/article/How-to-install-the-Amazon-Prime-Video-app-on-my-Philips-TV-1657009835114?language=da#:~:text=The%20Amazon%20Prime%20Video%20app%20is%20available%20on%20your%20Philips,Continue%20reading%20for%20more%20information."
+          },
+          {
+            "t": " (Des 2025)"
+          }
+        ],
+        "dead": false
+      },
+      {
+        "runs": [
+          {
+            "t": "https://adstod.siminn.is/home/sjonvarp-simans-appid",
+            "href": "https://adstod.siminn.is/home/sjonvarp-simans-appid"
+          },
+          {
+            "t": " (sótt Mars 2026 / upplýs. frá Jan. 2026)"
+          }
+        ],
+        "dead": false
+      }
+    ]
+  }
+}

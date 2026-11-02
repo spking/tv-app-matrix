@@ -1,34 +1,46 @@
 <!doctype html>
-<html lang="en">
+<html lang="is">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Matrix</title>
+  <title>App Matrix</title>
+  <meta name="description" content="Samhæfni streymisveitna og sjónvarpsstýrikerfa">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='17' rx='3' fill='none' stroke='%232f6fde' stroke-width='3'/%3E%3Cpath d='M10 28h12' stroke='%232f6fde' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
-  <script src="config.js"></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <header class="top">
-    <div>
-      <h1 id="title">Matrix</h1>
-      <p id="subtitle" class="muted" hidden></p>
+    <div class="heading">
+      <h1 id="title">App Matrix</h1>
+      <p id="subtitle" class="muted"></p>
     </div>
-    <div class="tools">
-      <input id="search" type="search" placeholder="Filter rows…" aria-label="Filter rows" autocomplete="off">
-      <span id="count" class="muted" aria-live="polite"></span>
+    <div class="search">
+      <input id="q" type="search" placeholder="Leita, t.d. „samsung hbo“" aria-label="Leita að stýrikerfi, framleiðanda eða appi" autocomplete="off" spellcheck="false">
+      <p id="answer" class="answer" aria-live="polite" hidden></p>
     </div>
   </header>
 
-  <nav id="tabs" class="tabs" role="tablist" hidden></nav>
-
   <main>
-    <div id="status" class="muted">Loading…</div>
-    <div class="table-wrap" id="wrap" hidden>
+    <p id="status" class="muted">Hleð gögnum…</p>
+
+    <div id="table-wrap" class="table-wrap" hidden>
       <table id="matrix"></table>
     </div>
+    <div id="cards" class="cards" hidden></div>
+    <p id="empty" class="muted empty" hidden>Ekkert stýrikerfi passar við leitina.</p>
+
+    <section id="sources" class="sources" hidden>
+      <details>
+        <summary>Heimildir <span id="sources-meta" class="muted"></span></summary>
+        <ol id="sources-list"></ol>
+      </details>
+    </section>
   </main>
 
-  <footer class="muted"><span id="updated"></span></footer>
+  <footer class="muted">
+    <span id="updated"></span>
+    <span id="author"></span>
+  </footer>
 </body>
 </html>
