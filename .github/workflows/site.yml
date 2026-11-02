@@ -29,7 +29,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Decide whether to refresh data
         id: src
@@ -39,7 +39,7 @@ jobs:
           elif [ "${{ github.event_name }}" != "push" ]; then echo "mode=sheet" >> "$GITHUB_OUTPUT"
           else echo "mode=none" >> "$GITHUB_OUTPUT"; fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.src.outputs.mode != 'none'
         with: { node-version: 22, cache: npm }
 
@@ -78,7 +78,7 @@ jobs:
           mkdir _site
           cp -r index.html app.js style.css data _site/
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with: { path: _site }
 
   deploy:
@@ -89,4 +89,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
