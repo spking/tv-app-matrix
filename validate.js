@@ -4,9 +4,9 @@
 //
 // Shape:
 // {
-//   title, subtitle, cornerLabel, updated, author: string
+//   title, subtitle, cornerLabel: string
 //   apps:    [{ name, logo? }]                      logo = "logos/<file>"
-//   rows:    [{ name, detail, values: ["Já"|"Nei", …one per app] }]
+//   rows:    [{ name, detail, values: ["Já"|"Nei", …one per app] }]   detail = TV brands, shown in the ⓘ
 //   sources: { updated, items: [{ label, url, note, dead }] }
 // }
 
@@ -26,7 +26,7 @@ export function validate(d) {
   if (!d || typeof d !== "object" || Array.isArray(d)) return ["Gögnin eru ekki á réttu formi"];
 
   str(d.title, "Titill", { required: true, max: 120 });
-  for (const [k, label] of [["subtitle", "Undirtitill"], ["cornerLabel", "Dálkaheiti"], ["updated", "Síðast uppfært"], ["author", "Höfundur"]]) {
+  for (const [k, label] of [["subtitle", "Undirtitill"], ["cornerLabel", "Dálkaheiti"]]) {
     str(d[k] ?? "", label, { max: 200 });
   }
 
@@ -80,5 +80,5 @@ export function validate(d) {
   return errors;
 }
 
-// "Tizen" + "(Samsung)" -> "Tizen (Samsung)"
-export const rowLabel = (r) => (r.detail ? `${r.name} ${r.detail}` : r.name);
+// "Tizen" + "Samsung" -> "Tizen (Samsung)"
+export const rowLabel = (r) => (r.detail ? `${r.name} (${r.detail})` : r.name);

@@ -2,6 +2,10 @@
 // own token; the deploy workflow re-validates and publishes. See README.md.
 import { validate, rowLabel } from "./validate.js";
 
+// The page adds the brackets around the TV brands itself, so drop any typed in.
+const cleanDetail = (d) => (d || "").trim().replace(/^\((.*)\)$/, "$1").trim();
+const label = (r) => rowLabel({ name: (r.name || "").trim(), detail: cleanDetail(r.detail) });
+
 const OWNER = "spking", REPO = "tv-app-matrix", BRANCH = "main";
 const DATA_PATH = "data/matrix.json";
 const WORKFLOW_NAME = "Update & deploy";
@@ -77,9 +81,8 @@ const clone = (d) => structuredClone(d);
 function serialize(d) {
   const out = {
     title: d.title, subtitle: d.subtitle || "", cornerLabel: d.cornerLabel || "",
-    updated: d.updated || "", author: d.author || "",
     apps: d.apps.map((a) => (a.logo ? { name: a.name.trim(), logo: a.logo } : { name: a.name.trim() })),
-    rows: d.rows.map((r) => ({ name: r.name.trim(), detail: (r.detail || "").trim(), values: [...r.values] })),
+    rows: d.rows.map((r) => ({ name: r.name.trim(), detail: cleanDetail(r.detail), values: [...r.values] })),
     sources: {
       updated: d.sources.updated || "",
       items: d.sources.items.map((s) => ({ label: (s.label || "").trim(), url: (s.url || "").trim(), note: (s.note || "").trim(), dead: !!s.dead })),
@@ -101,7 +104,7 @@ function describeChanges(a, b) {
   const byId = (list) => new Map(list.map((x) => [x._id, x]));
   const oa = byId(a.apps), na = byId(b.apps), or = byId(a.rows), nr = byId(b.rows);
 
-  for (const [k, label] of [["title", "Titill"], ["subtitle", "Undirtitill"], ["cornerLabel", "Dálkaheiti"], ["author", "Höfundur"]]) {
+  for (const [k, label] of [["title", "Titill"], ["subtitle", "Undirtitill"], ["cornerLabel", "Dálkaheiti"]]) {
     if ((a[k] || "") !== (b[k] || "")) out.push(`${label}: „${a[k] || ""}“ → „${b[k] || ""}“`);
   }
   for (const x of b.apps) {
@@ -116,14 +119,14 @@ function describeChanges(a, b) {
   for (const o of a.apps) if (!na.has(o._id)) out.push(`App fjarlægt: ${o.name}`);
   for (const x of b.rows) {
     const o = or.get(x._id);
-    if (!o) { out.push(`Nýtt stýrikerfi: ${rowLabel(x)}`); continue; }
-    if (rowLabel(o) !== rowLabel(x)) out.push(`Stýrikerfi endurnefnt: ${rowLabel(o)} → ${rowLabel(x)}`);
+    if (!o) { out.push(`Nýtt stýrikerfi: ${label(x)}`); continue; }
+    if (label(o) !== label(x)) out.push(`Stýrikerfi endurnefnt: ${label(o)} → ${label(x)}`);
     b.apps.forEach((app, j) => {
       const i = a.apps.findIndex((p) => p._id === app._id);
-      if (i >= 0 && o.values[i] !== x.values[j]) out.push(`${app.name} á ${rowLabel(x)}: ${o.values[i]} → ${x.values[j]}`);
+      if (i >= 0 && o.values[i] !== x.values[j]) out.push(`${app.name} á ${label(x)}: ${o.values[i]} → ${x.values[j]}`);
     });
   }
-  for (const o of a.rows) if (!nr.has(o._id)) out.push(`Stýrikerfi fjarlægt: ${rowLabel(o)}`);
+  for (const o of a.rows) if (!nr.has(o._id)) out.push(`Stýrikerfi fjarlægt: ${label(o)}`);
   const common = (x, y) => x.map((i) => i._id).filter((id) => y.some((j) => j._id === id)).join(",");
   if (common(a.apps, b.apps) !== common(b.apps, a.apps)) out.push("Röð appa breytt");
   if (common(a.rows, b.rows) !== common(b.rows, a.rows)) out.push("Röð stýrikerfa breytt");
@@ -210,15 +213,15 @@ function renderGrid() {
   const body = h("tbody");
   state.rows.forEach((row, i) => {
     const tr = h("tr", {}, h("th", { class: "row-edit" },
-      h("input", { class: "os-name-input", value: row.name, placeholder: "Heiti, t.d. Tizen", "aria-label": "Heiti stýrikerfis",
+      h("input", { class: "os-name-input", value: row.name, placeholder: "Heiti, t.d. Tizen eða TitanOS 2024+", "aria-label": "Heiti stýrikerfis",
         oninput: (e) => { row.name = e.target.value; updateDirty(); } }),
-      h("input", { class: "os-detail-input", value: row.detail || "", placeholder: "Nánar, t.d. (Samsung)", "aria-label": "Nánar",
+      h("input", { class: "os-detail-input", value: row.detail || "", placeholder: "Sjónvörp, t.d. Samsung, LG", "aria-label": "Sjónvörp (sýnt í ⓘ)", title: "Sýnt þegar smellt er á ⓘ",
         oninput: (e) => { row.detail = e.target.value; updateDirty(); } }),
       h("div", { class: "mini" },
         iconButton("Færa upp", "▲", () => { move(state.rows, i, -1); render(); }, i === 0),
         iconButton("Færa niður", "▼", () => { move(state.rows, i, 1); render(); }, i === state.rows.length - 1),
         iconButton("Eyða stýrikerfi", "✕", () => {
-          if (!confirm(`Eyða „${rowLabel(row) || "nýju stýrikerfi"}“?`)) return;
+          if (!confirm(`Eyða „${label(row) || "nýju stýrikerfi"}“?`)) return;
           state.rows.splice(i, 1); render();
         }),
       )));
@@ -229,7 +232,7 @@ function renderGrid() {
         btn.className = "toggle tick " + (yes ? "yes" : "no");
         btn.replaceChildren(tickIcon(yes));
         btn.title = yes ? "Já – smelltu til að breyta í Nei" : "Nei – smelltu til að breyta í Já";
-        btn.setAttribute("aria-label", `${apps[j].name} á ${rowLabel(row)}: ${row.values[j]}`);
+        btn.setAttribute("aria-label", `${apps[j].name} á ${label(row)}: ${row.values[j]}`);
       };
       btn.addEventListener("click", () => { row.values[j] = row.values[j] === "Já" ? "Nei" : "Já"; paint(); updateDirty(); });
       paint();
@@ -259,7 +262,6 @@ function renderGeneral() {
     input.value = state[k] || "";
     input.oninput = () => { state[k] = input.value; if (k === "cornerLabel") document.querySelector("#grid .corner").textContent = input.value; updateDirty(); };
   }
-  $("updated").textContent = state.updated || "—";
 }
 
 function renderSources() {
@@ -353,10 +355,8 @@ async function save() {
   if (!changes.length && !pendingLogos().length) return;
   $("notice").hidden = true;   // clear any earlier error
 
-  if ($("bump-date").checked) {
-    next.updated = today();
-    if (JSON.stringify(serializeSources(original)) !== JSON.stringify(serializeSources(next))) next.sources.updated = today();
-  }
+  // The sources' "uppfært" date follows changes to the sources.
+  if (JSON.stringify(serializeSources(original)) !== JSON.stringify(serializeSources(next))) next.sources.updated = today();
 
   const text = serialize(next);
   const errors = validate(JSON.parse(text));

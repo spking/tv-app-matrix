@@ -21,4 +21,4 @@ for (const a of data.apps || []) {
   else if (statSync(a.logo).size > 1024 * 1024) errors.push(`${a.name}: ${a.logo} is over 1 MB`);
 }
 if (errors.length) fail(errors);
-console.log(`OK: ${data.rows.length} OS × ${data.apps.length} apps, ${data.sources?.items.length ?? 0} sources, updated ${data.updated}`);
+console.log(`OK: ${data.rows.length} OS × ${data.apps.length} apps, ${data.sources?.items.length ?? 0} sources`);

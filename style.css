@@ -140,7 +140,38 @@ thead th.hi { background: #2b3a6b; }
 .rowhead { display: table-cell; }
 .rowhead .os { display: inline; }
 .os-name { font-weight: 700; }
-.os-detail { color: var(--muted); }
+
+/* ⓘ with the TV brands */
+.info { position: relative; display: inline-block; vertical-align: middle; margin-left: 4px; }
+.info-btn {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0;
+  border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer;
+}
+.info-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+.info-btn:hover, .info-btn[aria-expanded="true"] { color: var(--accent); }
+.info-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tip {
+  position: absolute; z-index: 20; left: calc(100% + 6px); top: 50%; transform: translateY(-50%);
+  width: max-content; max-width: 220px;
+  background: var(--head); color: var(--head-text);
+  font-size: 13px; font-weight: 400; line-height: 1.35; text-align: left; white-space: normal;
+  padding: 6px 10px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  display: none;            /* fully out of layout when closed */
+  pointer-events: none;
+}
+.tip::before {   /* little arrow pointing at the icon */
+  content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+  border: 5px solid transparent; border-right-color: var(--head);
+}
+.info-btn:focus-visible + .tip, .info-btn[aria-expanded="true"] + .tip { display: block; }
+/* Hover only where there is a real pointer; on touch screens a tapped button stays
+   "hovered", which would stop a second tap from closing the tip. */
+@media (hover: hover) { .info-btn:hover + .tip { display: block; } }
+/* Phone cards: open below the name instead of to the side. */
+.card .tip { left: -4px; top: calc(100% + 6px); transform: none; max-width: min(240px, 70vw); }
+.card .tip::before { right: auto; left: 10px; top: auto; bottom: 100%; transform: none; border-right-color: transparent; border-bottom-color: var(--head); }
+@media (prefers-color-scheme: dark) { .card .tip::before { border-right-color: transparent; border-bottom-color: #2a3555; } }
+@media (prefers-color-scheme: dark) { .tip { background: #2a3555; } .tip::before { border-right-color: #2a3555; } }
 .rowhead .score { float: right; margin-left: 10px; }
 .score { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 td { text-align: center; }
@@ -151,11 +182,11 @@ tbody tr:hover td:not(.hi) { background: color-mix(in srgb, var(--hi) 45%, trans
 .cards { display: none; gap: 12px; }
 .card {
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden;
 }
 .card header {
   display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
   padding: 10px 14px; background: var(--rowhead); border-bottom: 2px solid var(--accent);
+  border-radius: 12px 12px 0 0;
 }
 .card h2 { font-size: 16px; font-weight: 400; margin: 0; }
 .card ul { list-style: none; margin: 0; padding: 4px 0; }
@@ -165,6 +196,7 @@ tbody tr:hover td:not(.hi) { background: color-mix(in srgb, var(--hi) 45%, trans
 }
 .card li .app-name { flex: 1; }
 .card li.hi { background: var(--hi); }
+.card li:last-child { border-radius: 0 0 12px 12px; }
 
 @media (max-width: 760px) {
   .table-wrap { display: none; }
@@ -183,10 +215,6 @@ tbody tr:hover td:not(.hi) { background: color-mix(in srgb, var(--hi) 45%, trans
 .sources li.dead { color: var(--muted); text-decoration: line-through; }
 a { color: var(--accent); }
 
-footer {
-  margin-top: 28px; font-size: 13px;
-  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
-}
 
 /* ---------- Print: A4 landscape, table only ---------- */
 @media print {
@@ -196,6 +224,12 @@ footer {
   .search, .cards, .empty { display: none !important; }
   .table-wrap { display: block !important; border: 1px solid #ccc; overflow: visible; }
   .rowhead { position: static; }
+  .info-btn { display: none; }
+  .tip { position: static; transform: none; background: none; color: #555;
+         box-shadow: none; padding: 0; font-size: inherit; display: inline; margin-left: .3em; }
+  .info { margin-left: 0; }
+  .tip::before { content: "("; position: static; border: 0; transform: none; }
+  .tip::after { content: ")"; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sources a { color: inherit; }
 }

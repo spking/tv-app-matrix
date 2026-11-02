@@ -41,12 +41,12 @@ To let someone else edit, add them as a collaborator on the repo (**Settings →
 Open `admin.html` and connect. You can then:
 
 - **Toggle Já/Nei** by clicking a cell.
-- **Add an operating system** with **+ Stýrikerfi**. Put the brand in *Nánar*, for example `(Hisense)`, and it shows in grey after the name.
+- **Add an operating system** with **+ Stýrikerfi**. The name is what everyone sees, so include anything that tells rows apart (for example `TitanOS 2024+`). Put the TV brands in *Sjónvörp*, for example `Hisense`. They appear behind a small ⓘ next to the name (on hover, or a tap on phones) and are still found by search.
 - **Add an app** with **+ App**, then click its logo tile to upload a logo. PNG, JPG, WebP and SVG all work; square logos look best. Images are scaled down automatically.
 - **Reorder** with ▲ ▼ ◀ ▶, **delete** with ✕, and **remove a logo** with ⌫.
 - **Edit general text and sources** below the matrix. Tick *Úrelt* (outdated) to show a source as dead.
 
-**Vista og birta** (save and publish) lists your changes for confirmation, then saves them as a single commit. The editor follows the deploy and tells you when the change is live, which usually takes about a minute. The "Síðast uppfært" date is set to today automatically; untick the box to keep the old date.
+**Vista og birta** (save and publish) lists your changes for confirmation, then saves them as a single commit. The editor follows the deploy and tells you when the change is live, which usually takes about a minute. When you change the sources, their "uppfært" date is set to today automatically. Who changed what, and when, is in the repo's commit history.
 
 If someone else saved while you were editing, your save is refused instead of overwriting theirs. Reload and make your change again.
 
@@ -57,7 +57,7 @@ If someone else saved while you were editing, your save is refused instead of ov
 | `index.html`, `app.js`, `style.css` | The public page |
 | `admin.html`, `admin.js`, `admin.css` | The editor |
 | `validate.js` | Data rules, shared by the editor and the deploy check |
-| `data/matrix.json` | The matrix, general text and sources |
+| `data/matrix.json` | The matrix, title texts and sources |
 | `logos/` | App logos, referenced from `data/matrix.json` |
 | `scripts/check.mjs` | Deploy check (`npm run check`) |
 | `.github/workflows/site.yml` | Check and deploy on every push to `main` |

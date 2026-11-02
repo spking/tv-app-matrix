@@ -100,11 +100,47 @@
     return el("span", "mark m-" + k, value || "–");
   }
 
+  // OS name, plus an ⓘ that reveals the TV brands (row.detail). Opens on hover and
+  // keyboard focus, and toggles on tap/click so it also works on phones.
+  let tipCount = 0;
   function osLabel(row, tag) {
     const h = el(tag, "os");
     h.append(el("span", "os-name", row.name));
-    if (row.detail) h.append(" ", el("span", "os-detail", row.detail));
+    if (!row.detail) return h;
+    const id = "tip-" + ++tipCount;
+    const wrap = el("span", "info");
+    const btn = el("button", "info-btn");
+    btn.type = "button";
+    btn.setAttribute("aria-label", `Nánar um ${row.name}`);
+    btn.setAttribute("aria-describedby", id);
+    btn.setAttribute("aria-expanded", "false");
+    btn.append(infoIcon());
+    const tip = el("span", "tip", row.detail);
+    tip.id = id;
+    tip.setAttribute("role", "tooltip");
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = btn.getAttribute("aria-expanded") !== "true";
+      closeTips();
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    wrap.append(btn, tip);
+    h.append(wrap);
     return h;
+  }
+  function closeTips() {
+    document.querySelectorAll('.info-btn[aria-expanded="true"]').forEach((b) => b.setAttribute("aria-expanded", "false"));
+  }
+  function infoIcon() {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    const c = document.createElementNS(SVG_NS, "circle");
+    c.setAttribute("cx", "8"); c.setAttribute("cy", "8"); c.setAttribute("r", "6.75");
+    const i = document.createElementNS(SVG_NS, "path");
+    i.setAttribute("d", "M8 7.2v4.3M8 4.6v.1");
+    svg.append(c, i);
+    return svg;
   }
 
   function score(row) {
@@ -217,19 +253,23 @@
       $("status").textContent = "Ekki tókst að hlaða gögnum (" + e.message + ").";
       return;
     }
-    for (const r of data.rows) { r.label = r.detail ? `${r.name} ${r.detail}` : r.name; r._key = fold(r.label); }
+    for (const r of data.rows) { r.label = r.detail ? `${r.name} (${r.detail})` : r.name; r._key = fold(r.label); }
     for (const a of data.apps) a._key = fold(a.name);
 
     document.title = data.title;
     $("title").textContent = data.title;
     $("subtitle").textContent = data.subtitle;
-    if (data.updated) $("updated").textContent = "Síðast uppfært " + data.updated;
-    if (data.author) $("author").textContent = data.author;
     $("status").hidden = true;
 
     const q = new URLSearchParams(location.search).get("q");
     if (q) $("q").value = q;
     let t;
+    document.addEventListener("click", closeTips);
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      closeTips();
+      if (document.activeElement?.classList.contains("info-btn")) document.activeElement.blur();
+    });
     $("q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 80); });
     render();
     renderSources(data.sources);
