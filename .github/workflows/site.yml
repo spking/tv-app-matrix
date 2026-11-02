@@ -36,6 +36,7 @@ jobs:
           mkdir _site
           cp -r *.html *.js *.css data logos _site/
           node scripts/stamp-version.mjs _site/data/matrix.json
+          node scripts/cache-bust.mjs _site
 
       - uses: actions/upload-pages-artifact@v5
         with: { path: _site }

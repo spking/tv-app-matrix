@@ -74,6 +74,7 @@ Version 4.0 is the first version published on GitHub Pages (commit `99384b5`); 3
 | `data/matrix.json` | The matrix, title texts and sources |
 | `version.json` | Main version number and counting base for "útgáfa X.Y" |
 | `scripts/stamp-version.mjs` | Writes the version into the deployed copy of the data |
+| `scripts/cache-bust.mjs` | Tags script, stylesheet and logo URLs in the deployed copy with the commit, so browsers load the new files right after a deploy |
 | `logos/` | App logos, referenced from `data/matrix.json` |
 | `scripts/check.mjs` | Deploy check (`npm run check`) |
 | `.github/workflows/site.yml` | Check and deploy on every push to `main` |
