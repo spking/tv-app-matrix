@@ -47,7 +47,7 @@ Open `admin.html` and connect. You can then:
 - **Write the Leiðavísir** (guide box) below the matrix. A blank line starts a new paragraph, lines starting with `- ` become bullet points, and web addresses become links. A preview shows how it will look. The box is hidden on the public page while the text is empty.
 - **Edit general text and sources** below that. Tick *Úrelt* (outdated) to show a source as dead.
 
-**Vista og birta** (save and publish) lists your changes for confirmation, then saves them as a single commit. The editor follows the deploy and tells you when the change is live, which usually takes about a minute. When you change the sources, their "uppfært" date is set to today automatically. Who changed what, and when, is in the repo's commit history.
+**Vista og birta** (save and publish) lists your changes for confirmation, then saves them as a single commit. The editor follows the deploy and tells you when the change is live, which usually takes about a minute. The footer's "Síðast uppfært" date and the version number update themselves with every change to the site. Who changed what, and when, is in the repo's commit history.
 
 If someone else saved while you were editing, your save is refused instead of overwriting theirs. Reload and make your change again.
 

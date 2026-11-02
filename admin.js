@@ -72,7 +72,7 @@ let state = null;          // what's being edited
 const withIds = (d) => {
   for (const a of d.apps) a._id ??= nextId++;
   for (const r of d.rows) r._id ??= nextId++;
-  d.sources ??= { updated: "", items: [] };
+  d.sources ??= { items: [] };
   d.guide ??= { title: "Leiðavísir", text: "" };
   for (const s of d.sources.items) s._id ??= nextId++;
   return d;
@@ -87,7 +87,6 @@ function serialize(d) {
     rows: d.rows.map((r) => ({ name: r.name.trim(), detail: cleanDetail(r.detail), values: [...r.values] })),
     guide: { title: (d.guide?.title || "").trim() || "Leiðavísir", text: (d.guide?.text || "").replace(/\s+$/, "") },
     sources: {
-      updated: d.sources.updated || "",
       items: d.sources.items.map((s) => ({ label: (s.label || "").trim(), url: (s.url || "").trim(), note: (s.note || "").trim(), dead: !!s.dead })),
     },
   };
@@ -95,11 +94,6 @@ function serialize(d) {
 }
 const pendingLogos = () => state.apps.filter((a) => a._pending);
 const isDirty = () => state && (serialize(state) !== originalText || pendingLogos().length > 0);
-
-function today() {
-  const d = new Date(), p = (n) => String(n).padStart(2, "0");
-  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
-}
 
 // ---------- describing changes ----------
 function describeChanges(a, b) {
@@ -375,8 +369,6 @@ async function save() {
   if (!changes.length && !pendingLogos().length) return;
   $("notice").hidden = true;   // clear any earlier error
 
-  // The sources' "uppfært" date follows changes to the sources.
-  if (JSON.stringify(serializeSources(original)) !== JSON.stringify(serializeSources(next))) next.sources.updated = today();
 
   const text = serialize(next);
   const errors = validate(JSON.parse(text));

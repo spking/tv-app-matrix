@@ -8,7 +8,7 @@
 //   apps:    [{ name, logo? }]                      logo = "logos/<file>"
 //   rows:    [{ name, detail, values: ["Já"|"Nei", …one per app] }]   detail = TV brands, shown in the ⓘ
 //   guide:   { title, text }                         "Leiðavísir" box; hidden while text is empty
-//   sources: { updated, items: [{ label, url, note, dead }] }
+//   sources: { items: [{ label, url, note, dead }] }
 // }
 
 export const VALUES = ["Já", "Nei"];
@@ -75,7 +75,6 @@ export function validate(d) {
   if (d.sources != null) {
     if (typeof d.sources !== "object" || !Array.isArray(d.sources.items)) err("Heimildir", "ógilt");
     else {
-      str(d.sources.updated ?? "", "Heimildir uppfærðar", { max: 40 });
       d.sources.items.forEach((s, i) => {
         const where = `Heimild ${i + 1}`;
         if (!s || typeof s !== "object") return err(where, "ógild");

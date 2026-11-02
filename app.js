@@ -228,7 +228,7 @@ import { renderGuide } from "./render-guide.js";
 
   function renderSources(src) {
     if (!src || !src.items.length) return;
-    $("sources-meta").textContent = `(${src.items.length})` + (src.updated ? ` · uppfært ${src.updated}` : "");
+    $("sources-meta").textContent = `(${src.items.length})`;
     const ol = $("sources-list");
     for (const item of src.items) {
       const li = el("li", item.dead ? "dead" : "");
@@ -262,7 +262,14 @@ import { renderGuide } from "./render-guide.js";
     $("title").textContent = data.title;
     // The deploy stamps data.version (see scripts/stamp-version.mjs).
     $("subtitle").textContent = [data.version && `útgáfa ${data.version}`, data.subtitle].filter(Boolean).join(" | ");
-    if (data.versionDate) $("subtitle").title = `Útgáfa ${data.version}, ${data.versionDate.split("-").reverse().join("/")}`;
+    // Site-wide "last updated": the date of the change being shown (stamped at deploy,
+    // so any edit to the site moves it, together with the version number).
+    if (data.versionDate) {
+      const date = data.versionDate.split("-").reverse().join("/");   // yyyy-mm-dd → dd/mm/yyyy
+      $("subtitle").title = `Útgáfa ${data.version}, ${date}`;
+      $("site-updated").textContent = `Síðast uppfært ${date}` + (data.version ? ` · útgáfa ${data.version}` : "");
+      $("site-footer").hidden = false;
+    }
     $("status").hidden = true;
 
     const q = new URLSearchParams(location.search).get("q");
