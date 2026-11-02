@@ -297,6 +297,75 @@ tbody tr:hover .rowhead { background: linear-gradient(90deg, rgba(94,200,255,.12
 .sources li { margin: 4px 0; overflow-wrap: anywhere; }
 .sources li.dead { color: var(--muted); text-decoration: line-through; }
 
+/* ---------- Desktop scale ----------
+   Phones (≤760px) keep the base sizes above. Wider screens get a larger layout so the
+   page fills the monitor and the matrix reads comfortably from a step back.
+   "screen" only, so printing keeps its own compact sizes. */
+@media screen and (min-width: 761px) {
+  body { max-width: min(1560px, 94vw); font-size: 16.5px; padding-top: 36px; }
+  h1 { font-size: 34px; }
+  #subtitle { font-size: 16px; margin-top: 8px; }
+  .top { margin-bottom: 28px; }
+  .search { max-width: 460px; }
+  #q { font-size: 16.5px; padding: 13px 17px; border-radius: 14px; }
+  .answer { font-size: 16px; }
+
+  th, td { padding: 13px 16px; }
+  thead th { font-size: 14.5px; padding-top: 16px; padding-bottom: 14px; }
+  thead th.corner { font-size: 16px; }
+  thead th.app { min-width: 110px; }
+  thead th.app .logo { margin-bottom: 9px; }
+  .logo { width: 46px; height: 46px; border-radius: 12px; }
+
+  .rowhead { min-width: 270px; padding-left: 20px; }
+  .os-name { font-size: 17.5px; }
+  .score { font-size: 13.5px; }
+
+  .tick { width: 36px; height: 36px; border-radius: 10px; }
+  .tick::before { border-radius: 9px 9px 12px 12px / 9px 9px 6px 6px; }
+  .tick svg { width: 20px; height: 20px; stroke-width: 2.8; }
+  .answer .tick { width: 26px; height: 26px; border-radius: 7px; }
+  .answer .tick svg { width: 15px; height: 15px; }
+
+  .info { margin-left: 6px; }
+  .info-btn { width: 28px; height: 28px; }
+  .info-btn svg { width: 20px; height: 20px; }
+  .tip { font-size: 15.5px; padding: 10px 14px; max-width: 300px; border-radius: 12px; left: calc(100% + 10px); }
+  .tip::before { border-width: 7px; }
+
+  .guide { margin-top: 30px; padding: 20px 24px 20px 28px; }
+  .guide h2 { font-size: 19px; }
+  .guide h2 svg { width: 21px; height: 21px; }
+  .guide-body { font-size: 16px; }
+  .sources { margin-top: 22px; padding: 14px 24px; }
+  .sources summary { font-size: 16.5px; }
+  .sources ol { font-size: 15.5px; }
+}
+/* Small laptops / tablets in landscape: same scale, tighter columns so the whole
+   matrix fits without scrolling sideways. */
+@media screen and (min-width: 761px) and (max-width: 1299px) {
+  th, td { padding: 12px 8px; }
+  thead th.app { min-width: 0; font-size: 13.5px; }
+  .rowhead { min-width: 200px; padding-left: 14px; }
+  .os-name { font-size: 16px; }
+  .tick { width: 32px; height: 32px; }
+  .tick svg { width: 18px; height: 18px; }
+  .logo { width: 40px; height: 40px; }
+}
+/* Large monitors: one more step. */
+@media screen and (min-width: 1700px) {
+  body { max-width: min(1720px, 92vw); font-size: 17.5px; }
+  h1 { font-size: 38px; }
+  th, td { padding: 15px 18px; }
+  .logo { width: 52px; height: 52px; border-radius: 13px; }
+  thead th.app { min-width: 124px; }
+  .os-name { font-size: 19px; }
+  .rowhead { min-width: 300px; }
+  .tick { width: 40px; height: 40px; border-radius: 11px; }
+  .tick svg { width: 22px; height: 22px; }
+  .tip { font-size: 16.5px; max-width: 320px; }
+}
+
 /* ---------- Print: light, A4 landscape, table only ---------- */
 @media print {
   @page { size: A4 landscape; margin: 12mm; }
