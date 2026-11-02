@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matrix</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1 id="title">Matrix</h1>
+      <p id="subtitle" class="muted" hidden></p>
+    </div>
+    <div class="tools">
+      <input id="search" type="search" placeholder="Filter rows…" aria-label="Filter rows" autocomplete="off">
+      <span id="count" class="muted" aria-live="polite"></span>
+    </div>
+  </header>
+
+  <nav id="tabs" class="tabs" role="tablist" hidden></nav>
+
+  <main>
+    <div id="status" class="muted">Loading…</div>
+    <div class="table-wrap" id="wrap" hidden>
+      <table id="matrix"></table>
+    </div>
+  </main>
+
+  <footer class="muted"><span id="updated"></span></footer>
+</body>
+</html>
