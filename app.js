@@ -260,7 +260,9 @@ import { renderGuide } from "./render-guide.js";
 
     document.title = data.title;
     $("title").textContent = data.title;
-    $("subtitle").textContent = data.subtitle;
+    // The deploy stamps data.version (see scripts/stamp-version.mjs).
+    $("subtitle").textContent = [data.version && `útgáfa ${data.version}`, data.subtitle].filter(Boolean).join(" | ");
+    if (data.versionDate) $("subtitle").title = `Útgáfa ${data.version}, ${data.versionDate.split("-").reverse().join("/")}`;
     $("status").hidden = true;
 
     const q = new URLSearchParams(location.search).get("q");

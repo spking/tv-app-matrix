@@ -1,0 +1,5 @@
+{
+  "_note": "Shown as 'útgáfa <major>.<minor>'. minor = number of commits in the repo minus base, so it rises by one with every commit pushed to main (each editor save is one commit). To start a new major version, e.g. 4.0, see README.md › Version number.",
+  "major": 3,
+  "base": 9
+}

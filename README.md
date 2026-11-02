@@ -51,6 +51,16 @@ Open `admin.html` and connect. You can then:
 
 If someone else saved while you were editing, your save is refused instead of overwriting theirs. Reload and make your change again.
 
+## Version number
+
+The subtitle starts with **útgáfa X.Y**, which updates itself on every deploy:
+
+- **Y** goes up by one with every commit pushed to `main`, and every save in the editor is one commit. A push containing several commits moves it up by that many.
+- The number is the repo's commit count minus `base` in `version.json`. The same content always has the same number, and nothing is written back to the repo.
+- It is added only to the deployed copy of the data, so the editor's *Undirtitill* field holds just the text after it.
+
+**To start a new main version** (for example 4.0): note the current version shown on the site, say 3.17. In `version.json`, set `"major": 4` and add the current minor plus 1 to `base` (so if `base` is 9, it becomes 9 + 17 + 1 = 27). That edit is itself a commit and deploys as 4.0. If you'd rather not do the sum, ask Claude.
+
 ## Files
 
 | Path | Purpose |
@@ -60,6 +70,8 @@ If someone else saved while you were editing, your save is refused instead of ov
 | `validate.js` | Data rules, shared by the editor and the deploy check |
 | `render-guide.js` | Formats the Leiðavísir text, shared by the page and the editor preview |
 | `data/matrix.json` | The matrix, title texts and sources |
+| `version.json` | Main version number and counting base for "útgáfa X.Y" |
+| `scripts/stamp-version.mjs` | Writes the version into the deployed copy of the data |
 | `logos/` | App logos, referenced from `data/matrix.json` |
 | `scripts/check.mjs` | Deploy check (`npm run check`) |
 | `.github/workflows/site.yml` | Check and deploy on every push to `main` |
